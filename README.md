@@ -41,28 +41,24 @@ A complete 3-module shopping application built with Flutter and Firebase, featur
 ## Technical Stack
 
 ### Frontend
-
 - **Flutter**: Cross-platform mobile development
 - **Material Design 3**: Modern UI components
 - **Provider**: State management
 - **Google Fonts**: Typography
 
 ### Backend
-
 - **Firebase Authentication**: User authentication and authorization
 - **Cloud Firestore**: NoSQL database for storing app data
 - **Firebase Storage**: Image storage for product photos
 - **Firebase Security Rules**: Role-based data access control
 
 ### Architecture
-
 - **Clean Architecture**: Separated concerns with models, services, providers, and UI
 - **Repository Pattern**: Abstracted data access through FirestoreService
 - **Provider Pattern**: Reactive state management
 - **Modular Design**: Separate modules for each user role
 
 ## Project Structure
-
 ```
 lib/
 ├── main.dart                 # App entry point with Firebase initialization
@@ -86,6 +82,12 @@ lib/
 │   ├── admin/
 │   ├── seller/
 │   └── user/
+│       ├── user_model.dart
+│       ├── product_model.dart
+│       ├── order_model.dart
+│       ├── category_model.dart
+│       ├── wishlist_screen.dart
+│       └── review_model.dart
 └── widgets/                 # Reusable UI components
     ├── common/
     ├── product_card.dart
