@@ -31,7 +31,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
                 onPressed: () {
-                  // Navigate to cart
+                  Navigator.of(context).pushNamed('/cart');
                 },
               ),
               if (cartProvider.itemCount > 0)

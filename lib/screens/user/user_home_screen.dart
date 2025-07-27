@@ -10,6 +10,7 @@ import 'package:shoporbit/screens/user/product_list_screen.dart';
 import 'package:shoporbit/screens/user/product_details_screen.dart';
 import 'package:shoporbit/screens/user/cart_screen.dart';
 import 'package:shoporbit/screens/user/order_history_screen.dart';
+import 'package:shoporbit/screens/user/wishlist_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -82,18 +83,23 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const CartScreen()),
                 );
+              } else if (value == 'wishlist') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const WishlistScreen()),
+                );
               } else if (value == 'logout') {
                 context.read<AuthProvider>().signOut();
               }
             },
             itemBuilder: (context) => [
               const PopupMenuItem(
-                value: 'cart',
+                value: 'wishlist',
                 child: Row(
                   children: [
-                    Icon(Icons.shopping_cart),
+                    Icon(Icons.favorite),
                     SizedBox(width: 8),
-                    Text('Cart'),
+                    Text('Wish List'),
                   ],
                 ),
               ),
@@ -149,7 +155,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             gradient: LinearGradient(
               colors: [
                 Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                Theme.of(context).colorScheme.primary.withAlpha(200),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -183,7 +189,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       style: TextStyle(
                         color: Theme.of(
                           context,
-                        ).colorScheme.onPrimary.withValues(alpha: 0.8),
+                        ).colorScheme.onPrimary.withAlpha(200),
                         fontSize: 14,
                       ),
                     ),
@@ -195,7 +201,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 size: 60,
                 color: Theme.of(
                   context,
-                ).colorScheme.onPrimary.withValues(alpha: 0.8),
+                ).colorScheme.onPrimary.withAlpha(200),
               ),
             ],
           ),

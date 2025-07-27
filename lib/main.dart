@@ -5,6 +5,7 @@ import 'package:shoporbit/theme.dart';
 import 'package:shoporbit/providers/auth_provider.dart';
 import 'package:shoporbit/providers/cart_provider.dart';
 import 'package:shoporbit/screens/auth/login_screen.dart';
+import 'package:shoporbit/screens/user/cart_screen.dart';
 import 'package:shoporbit/screens/admin/admin_dashboard.dart';
 import 'package:shoporbit/screens/seller/seller_dashboard.dart';
 import 'package:shoporbit/screens/user/user_home_screen.dart';
@@ -25,7 +26,11 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, CartProvider>(
+          create: (_) => CartProvider(),
+          update: (context, auth, previousCart) =>
+              previousCart!..update(auth),
+        ),
       ],
       child: MaterialApp(
         title: 'ShopOrbit - Multi-Role Shopping App',
@@ -34,6 +39,9 @@ class MyApp extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: ThemeMode.system,
         home: const AuthWrapper(),
+        routes: {
+          '/cart': (context) => const CartScreen(),
+        },
       ),
     );
   }

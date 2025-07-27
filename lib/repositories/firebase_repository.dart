@@ -5,6 +5,7 @@ import 'package:shoporbit/models/product_model.dart';
 import 'package:shoporbit/models/order_model.dart';
 import 'package:shoporbit/models/category_model.dart';
 import 'package:shoporbit/models/review_model.dart';
+import 'package:shoporbit/providers/cart_provider.dart';
 
 /// Centralized Firebase repository for all database operations
 class FirebaseRepository {
@@ -23,8 +24,12 @@ class FirebaseRepository {
   CollectionReference get _usersCollection => _firestore.collection('users');
   CollectionReference get _productsCollection => _firestore.collection('products');
   CollectionReference get _ordersCollection => _firestore.collection('orders');
-  CollectionReference get _categoriesCollection => _firestore.collection('categories');
+  CollectionReference get _categoriesCollection =>
+      _firestore.collection('categories');
   CollectionReference get _reviewsCollection => _firestore.collection('reviews');
+  CollectionReference get _cartsCollection => _firestore.collection('carts');
+  CollectionReference _wishlistCollection(String userId) =>
+      _usersCollection.doc(userId).collection('wishlist');
 
   // User Operations
   Future<UserModel?> getCurrentUserData() async {
@@ -436,4 +441,136 @@ class FirebaseRepository {
               return OrderModel.fromJson(data);
             }).toList());
   }
+
+  // Cart Operations
+  DocumentReference _getCartDoc(String userId) {
+    return _cartsCollection.doc(userId);
+  }
+
+  Future<void> addToCart(
+      String userId, ProductModel product, int quantity) async {
+    final cartRef = _getCartDoc(userId);
+
+    return _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(cartRef);
+
+      if (!snapshot.exists) {
+        transaction.set(cartRef, {
+          'userId': userId,
+          'updatedAt': FieldValue.serverTimestamp(),
+          'items': [
+            CartItem(product: product, quantity: quantity).toMap(),
+          ],
+        });
+        return;
+      }
+
+      final data = snapshot.data() as Map<String, dynamic>;
+      final items = (data['items'] as List<dynamic>)
+          .map((item) => CartItem.fromMap(item))
+          .toList();
+
+      final existingIndex =
+          items.indexWhere((item) => item.product.id == product.id);
+
+      if (existingIndex >= 0) {
+        items[existingIndex].quantity += quantity;
+      } else {
+        items.add(CartItem(product: product, quantity: quantity));
+      }
+
+      transaction.update(cartRef, {
+        'items': items.map((item) => item.toMap()).toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  Future<void> removeFromCart(String userId, String productId) async {
+    final cartRef = _getCartDoc(userId);
+
+    return _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(cartRef);
+      if (!snapshot.exists) return;
+
+      final data = snapshot.data() as Map<String, dynamic>;
+      final items = (data['items'] as List<dynamic>)
+          .map((item) => CartItem.fromMap(item))
+          .toList();
+
+      items.removeWhere((item) => item.product.id == productId);
+
+      transaction.update(cartRef, {
+        'items': items.map((item) => item.toMap()).toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  Future<void> updateQuantity(
+      String userId, String productId, int quantity) async {
+    final cartRef = _getCartDoc(userId);
+
+    return _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(cartRef);
+      if (!snapshot.exists) return;
+
+      final data = snapshot.data() as Map<String, dynamic>;
+      final items = (data['items'] as List<dynamic>)
+          .map((item) => CartItem.fromMap(item))
+          .toList();
+
+      final index = items.indexWhere((item) => item.product.id == productId);
+
+      if (index >= 0) {
+        if (quantity <= 0) {
+          items.removeAt(index);
+        } else {
+          items[index].quantity = quantity;
+        }
+      }
+
+      transaction.update(cartRef, {
+        'items': items.map((item) => item.toMap()).toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  Future<void> clearCart(String userId) async {
+    await _getCartDoc(userId).update({
+      'items': [],
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Stream<List<CartItem>> getCartStream(String userId) {
+    return _getCartDoc(userId).snapshots().map((snapshot) {
+      if (!snapshot.exists) return [];
+      final data = snapshot.data() as Map<String, dynamic>;
+      if (data['items'] == null) return [];
+      return (data['items'] as List<dynamic>)
+          .map((item) => CartItem.fromMap(item))
+          .toList();
+    });
+  }
+
+  // Wishlist Operations
+  Future<void> addToWishlist(String userId, ProductModel product) async {
+    await _wishlistCollection(userId).doc(product.id).set(product.toJson());
+  }
+
+  Future<void> removeFromWishlist(String userId, String productId) async {
+    await _wishlistCollection(userId).doc(productId).delete();
+  }
+
+  Stream<List<ProductModel>> getWishlistStream(String userId) {
+    return _wishlistCollection(userId).snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) =>
+              ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+    });
+  }
 }
+

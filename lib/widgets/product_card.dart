@@ -5,12 +5,14 @@ class ProductCard extends StatelessWidget {
   final ProductModel product;
   final VoidCallback onTap;
   final bool showActions;
+  final VoidCallback? onToggleWishlist;
 
   const ProductCard({
     super.key,
     required this.product,
     required this.onTap,
     this.showActions = false,
+    this.onToggleWishlist,
   });
 
   @override
@@ -98,6 +100,15 @@ class ProductCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                      ),
+                    ),
+                  if (onToggleWishlist != null)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.favorite, color: Colors.red),
+                        onPressed: onToggleWishlist,
                       ),
                     ),
                 ],
