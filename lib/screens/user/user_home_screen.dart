@@ -63,7 +63,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // Navigate to search screen
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const ProductListScreen(),
@@ -86,7 +85,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               } else if (value == 'wishlist') {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                      builder: (context) => const WishlistScreen()),
+                    builder: (context) => const WishlistScreen(),
+                  ),
                 );
               } else if (value == 'logout') {
                 context.read<AuthProvider>().signOut();
@@ -199,9 +199,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Icon(
                 Icons.shopping_bag,
                 size: 60,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onPrimary.withAlpha(200),
+                color: Theme.of(context).colorScheme.onPrimary.withAlpha(200),
               ),
             ],
           ),
