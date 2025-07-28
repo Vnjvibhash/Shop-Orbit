@@ -13,7 +13,6 @@ A complete 3-module shopping application built with Flutter and Firebase, featur
 - User blocking/unblocking functionality
 
 ### 👨‍💼 Admin Module
-
 - **Dashboard**: Analytics overview (total users, sellers, products, orders)
 - **User Management**: View and block/unblock users
 - **Seller Management**: Approve/reject sellers, view their products
@@ -21,7 +20,6 @@ A complete 3-module shopping application built with Flutter and Firebase, featur
 - **Order Monitoring**: View all orders across all sellers
 
 ### 🏪 Seller Module
-
 - **Dashboard**: Personal analytics and earnings tracking
 - **Product Management**: Add, edit, delete products with images
 - **Inventory Management**: Track stock levels and low inventory alerts
@@ -29,7 +27,6 @@ A complete 3-module shopping application built with Flutter and Firebase, featur
 - **Profile Management**: Update seller information
 
 ### 🛒 User Module
-
 - **Product Browsing**: Browse by categories and search functionality
 - **Product Details**: View detailed product information and reviews
 - **Shopping Cart**: Add to cart, update quantities, remove items
@@ -106,20 +103,17 @@ lib/
 ### Installation
 
 1. **Clone the repository**
-
    ```bash
    git clone <repository-url>
    cd ShopOrbit
    ```
 
 2. **Install dependencies**
-
    ```bash
    flutter pub get
    ```
 
 3. **Configure Firebase**
-
    - Create a Firebase project at https://console.firebase.google.com
    - Enable Authentication, Firestore, and Storage
    - Configure FlutterFire:
@@ -128,7 +122,6 @@ lib/
      ```
 
 4. **Set up Firestore Security Rules**
-
    - Copy the rules from `firestore.rules` to your Firebase console
    - Deploy the rules and indexes:
      ```bash
