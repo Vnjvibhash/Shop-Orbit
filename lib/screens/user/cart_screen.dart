@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shoporbit/providers/cart_provider.dart';
-import 'package:shoporbit/providers/auth_provider.dart';
 import 'package:shoporbit/models/order_model.dart';
+import 'package:shoporbit/providers/auth_provider.dart';
+import 'package:shoporbit/providers/cart_provider.dart';
 import 'package:shoporbit/services/firestore_service.dart';
 
 class CartScreen extends StatefulWidget {
@@ -18,10 +18,51 @@ class _CartScreenState extends State<CartScreen> {
   String selectedPaymentMethod = 'Cash on Delivery';
   bool isPlacingOrder = false;
 
+  // Fee and charge variables for easy configuration
+  final double deliveryCharge = 5.00;
+  final double gstRate = 0.18; // 18%
+  final double handlingFee = 2.00;
+
   @override
   void dispose() {
     _addressController.dispose();
     super.dispose();
+  }
+
+  // Helper method to build the summary rows for costs
+  Widget _buildPriceDetailRow(
+    String label,
+    String value, {
+    bool isTotal = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: isTotal ? 18 : 16,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: isTotal
+                  ? Theme.of(context).textTheme.bodyLarge?.color
+                  : Colors.grey[600],
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: isTotal ? 18 : 16,
+              fontWeight: FontWeight.bold,
+              color: isTotal
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -54,6 +95,12 @@ class _CartScreenState extends State<CartScreen> {
               ),
             );
           }
+
+          // Calculate all fees and totals
+          final double subtotal = cartProvider.totalAmount;
+          final double gstAmount = subtotal * gstRate;
+          final double grandTotal =
+              subtotal + deliveryCharge + gstAmount + handlingFee;
 
           return Column(
             children: [
@@ -187,13 +234,14 @@ class _CartScreenState extends State<CartScreen> {
                   },
                 ),
               ),
+              // Updated bottom summary bar with detailed breakdown
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.3),
+                      color: Colors.grey.withOpacity(0.3),
                       blurRadius: 4,
                       offset: const Offset(0, -2),
                     ),
@@ -201,25 +249,27 @@ class _CartScreenState extends State<CartScreen> {
                 ),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Total:',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '\$${cartProvider.totalAmount.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
+                    _buildPriceDetailRow(
+                      'Subtotal',
+                      '\$${subtotal.toStringAsFixed(2)}',
+                    ),
+                    _buildPriceDetailRow(
+                      'Delivery Charge',
+                      '\$${deliveryCharge.toStringAsFixed(2)}',
+                    ),
+                    _buildPriceDetailRow(
+                      'GST (18%)',
+                      '\$${gstAmount.toStringAsFixed(2)}',
+                    ),
+                    _buildPriceDetailRow(
+                      'Handling Fee',
+                      '\$${handlingFee.toStringAsFixed(2)}',
+                    ),
+                    const Divider(height: 24, thickness: 1),
+                    _buildPriceDetailRow(
+                      'Grand Total',
+                      '\$${grandTotal.toStringAsFixed(2)}',
+                      isTotal: true,
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
@@ -227,12 +277,15 @@ class _CartScreenState extends State<CartScreen> {
                       child: ElevatedButton(
                         onPressed: isPlacingOrder
                             ? null
-                            : () => _showCheckoutDialog(cartProvider),
+                            : () =>
+                                  _showCheckoutDialog(cartProvider, grandTotal),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: isPlacingOrder
-                            ? const CircularProgressIndicator()
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
                             : const Text('Checkout'),
                       ),
                     ),
@@ -246,7 +299,7 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  void _showCheckoutDialog(CartProvider cartProvider) {
+  void _showCheckoutDialog(CartProvider cartProvider, double grandTotal) {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -289,25 +342,36 @@ class _CartScreenState extends State<CartScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
+                // Updated summary inside the dialog
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      const Text(
-                        'Total Amount:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
+                      _buildPriceDetailRow(
+                        'Subtotal',
                         '\$${cartProvider.totalAmount.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+                      ),
+                      _buildPriceDetailRow(
+                        'Delivery Charge',
+                        '\$${deliveryCharge.toStringAsFixed(2)}',
+                      ),
+                      _buildPriceDetailRow(
+                        'GST (18%)',
+                        '\$${(cartProvider.totalAmount * gstRate).toStringAsFixed(2)}',
+                      ),
+                      _buildPriceDetailRow(
+                        'Handling Fee',
+                        '\$${handlingFee.toStringAsFixed(2)}',
+                      ),
+                      const Divider(),
+                      _buildPriceDetailRow(
+                        'Grand Total',
+                        '\$${grandTotal.toStringAsFixed(2)}',
+                        isTotal: true,
                       ),
                     ],
                   ),
@@ -323,7 +387,7 @@ class _CartScreenState extends State<CartScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _placeOrder(cartProvider);
+                _placeOrder(cartProvider, grandTotal);
               },
               child: const Text('Place Order'),
             ),
@@ -333,7 +397,7 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Future<void> _placeOrder(CartProvider cartProvider) async {
+  Future<void> _placeOrder(CartProvider cartProvider, double grandTotal) async {
     if (_addressController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -356,7 +420,6 @@ class _CartScreenState extends State<CartScreen> {
         throw Exception('User not logged in');
       }
 
-      // Group items by seller
       final Map<String, List<CartItem>> itemsBySeller = {};
       for (final item in cartProvider.items) {
         if (!itemsBySeller.containsKey(item.product.sellerId)) {
@@ -365,7 +428,6 @@ class _CartScreenState extends State<CartScreen> {
         itemsBySeller[item.product.sellerId]!.add(item);
       }
 
-      // Create separate orders for each seller
       for (final sellerId in itemsBySeller.keys) {
         final sellerItems = itemsBySeller[sellerId]!;
         final orderItems = sellerItems
@@ -380,21 +442,16 @@ class _CartScreenState extends State<CartScreen> {
             )
             .toList();
 
-        final totalAmount = sellerItems.fold(
-          0.0,
-          (sum, item) => sum + item.totalPrice,
-        );
-
         final order = OrderModel(
           id: '',
           userId: user.id,
           sellerId: sellerId,
           items: orderItems,
-          totalAmount: totalAmount,
+          totalAmount: grandTotal, // Save the final grand total
           status: 'pending',
           shippingAddress: _addressController.text,
           paymentMethod: selectedPaymentMethod,
-          isPaid: selectedPaymentMethod == 'Cash on Delivery' ? false : true,
+          isPaid: selectedPaymentMethod != 'Cash on Delivery',
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -405,7 +462,9 @@ class _CartScreenState extends State<CartScreen> {
       cartProvider.clearCart();
 
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(
+          context,
+        ).pop(); // Assuming this is to close a checkout summary page
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Order placed successfully!'),

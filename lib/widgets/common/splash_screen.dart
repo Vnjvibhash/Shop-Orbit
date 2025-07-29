@@ -49,11 +49,12 @@ class _SplashScreenState extends State<SplashScreen> {
             Image.asset('assets/images/logo.png', width: 120),
             const SizedBox(height: 16),
             Text(
-              'Shop Orbit',
+              'ShopOrbit\nMulti Role Shopping App',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

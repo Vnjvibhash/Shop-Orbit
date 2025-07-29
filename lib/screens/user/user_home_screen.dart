@@ -270,7 +270,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           decoration: BoxDecoration(
                             color: Theme.of(
                               context,
-                            ).colorScheme.primaryContainer,
+                            ).colorScheme.onPrimaryContainer,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: category.imageUrl.isNotEmpty
@@ -286,7 +286,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 )
                               : const Icon(Icons.category),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 5),
                         Text(
                           category.name,
                           style: const TextStyle(fontSize: 12),
