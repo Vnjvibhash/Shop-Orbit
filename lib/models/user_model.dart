@@ -2,20 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String id;
-  final String email;
   final String name;
-  final String role; // 'admin', 'seller', 'user'
+  final String email;
+  final String role;
   final String? profileImage;
   final List<String> addresses;
   final bool isBlocked;
-  final bool isApproved; // For sellers
+  final bool isApproved;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   UserModel({
     required this.id,
-    required this.email,
     required this.name,
+    required this.email,
     required this.role,
     this.profileImage,
     required this.addresses,
@@ -25,11 +25,12 @@ class UserModel {
     required this.updatedAt,
   });
 
+  // This method converts the Firestore data into a UserModel object
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] ?? '',
-      email: json['email'] ?? '',
       name: json['name'] ?? '',
+      email: json['email'] ?? '',
       role: json['role'] ?? 'user',
       profileImage: json['profileImage'],
       addresses: List<String>.from(json['addresses'] ?? []),
@@ -40,43 +41,20 @@ class UserModel {
     );
   }
 
+  // --- THIS IS THE METHOD TO FIX ---
+  // This method converts the UserModel object into a Map for Firestore
   Map<String, dynamic> toJson() {
     return {
-      'email': email,
+      'id': id,
       'name': name,
+      'email': email,
       'role': role,
       'profileImage': profileImage,
       'addresses': addresses,
       'isBlocked': isBlocked,
       'isApproved': isApproved,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
-  }
-
-  UserModel copyWith({
-    String? id,
-    String? email,
-    String? name,
-    String? role,
-    String? profileImage,
-    List<String>? addresses,
-    bool? isBlocked,
-    bool? isApproved,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return UserModel(
-      id: id ?? this.id,
-      email: email ?? this.email,
-      name: name ?? this.name,
-      role: role ?? this.role,
-      profileImage: profileImage ?? this.profileImage,
-      addresses: addresses ?? this.addresses,
-      isBlocked: isBlocked ?? this.isBlocked,
-      isApproved: isApproved ?? this.isApproved,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
   }
 }

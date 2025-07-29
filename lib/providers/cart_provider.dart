@@ -20,10 +20,7 @@ class CartItem {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'product': product.toJson(),
-      'quantity': quantity,
-    };
+    return {'product': product.toJson(), 'quantity': quantity};
   }
 }
 
@@ -35,7 +32,10 @@ class CartProvider extends ChangeNotifier {
   List<ProductModel> _wishlist = [];
   StreamSubscription<List<CartItem>>? _cartSubscription;
   StreamSubscription<List<ProductModel>>? _wishlistSubscription;
-  bool _isLocallyUpdating = false;
+
+  // --- ADDED: Loading state for async operations ---
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
   CartProvider();
 
@@ -66,21 +66,20 @@ class CartProvider extends ChangeNotifier {
     _wishlistSubscription?.cancel();
 
     if (user != null) {
-      _cartSubscription =
-          _cartRepository.getCartStream(user.id).listen((cartItems) {
-        if (!_isLocallyUpdating) {
-          _items = cartItems;
-          notifyListeners();
-        }
+      // --- MODIFIED: Simplified listener logic ---
+      _cartSubscription = _cartRepository.getCartStream(user.id).listen((
+        cartItems,
+      ) {
+        _items = cartItems;
+        notifyListeners();
       });
 
-      _wishlistSubscription =
-          _cartRepository.getWishlistStream(user.id).listen((wishlistItems) {
-        if (!_isLocallyUpdating) {
+      _wishlistSubscription = _cartRepository.getWishlistStream(user.id).listen(
+        (wishlistItems) {
           _wishlist = wishlistItems;
           notifyListeners();
-        }
-      });
+        },
+      );
     } else {
       _items = [];
       _wishlist = [];
@@ -88,23 +87,19 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
+  // --- MODIFIED: Methods now only call Firebase and manage loading state ---
+
   Future<void> addToCart(ProductModel product, {int quantity = 1}) async {
     final user = _authProvider?.currentUser;
     if (user == null) return;
 
-    _isLocallyUpdating = true;
+    _isLoading = true;
+    notifyListeners();
     try {
-      final existingIndex =
-          _items.indexWhere((item) => item.product.id == product.id);
-      if (existingIndex >= 0) {
-        _items[existingIndex].quantity += quantity;
-      } else {
-        _items.add(CartItem(product: product, quantity: quantity));
-      }
-      notifyListeners();
       await _cartRepository.addToCart(user.id, product, quantity);
     } finally {
-      _isLocallyUpdating = false;
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -112,13 +107,13 @@ class CartProvider extends ChangeNotifier {
     final user = _authProvider?.currentUser;
     if (user == null) return;
 
-    _isLocallyUpdating = true;
+    _isLoading = true;
+    notifyListeners();
     try {
-      _items.removeWhere((item) => item.product.id == productId);
-      notifyListeners();
       await _cartRepository.removeFromCart(user.id, productId);
     } finally {
-      _isLocallyUpdating = false;
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -126,20 +121,13 @@ class CartProvider extends ChangeNotifier {
     final user = _authProvider?.currentUser;
     if (user == null) return;
 
-    final index = _items.indexWhere((item) => item.product.id == productId);
-    if (index >= 0) {
-      _isLocallyUpdating = true;
-      try {
-        if (quantity <= 0) {
-          _items.removeAt(index);
-        } else {
-          _items[index].quantity = quantity;
-        }
-        notifyListeners();
-        await _cartRepository.updateQuantity(user.id, productId, quantity);
-      } finally {
-        _isLocallyUpdating = false;
-      }
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _cartRepository.updateQuantity(user.id, productId, quantity);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -147,13 +135,13 @@ class CartProvider extends ChangeNotifier {
     final user = _authProvider?.currentUser;
     if (user == null) return;
 
-    _isLocallyUpdating = true;
+    _isLoading = true;
+    notifyListeners();
     try {
-      _items.clear();
-      notifyListeners();
       await _cartRepository.clearCart(user.id);
     } finally {
-      _isLocallyUpdating = false;
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -161,15 +149,13 @@ class CartProvider extends ChangeNotifier {
     final user = _authProvider?.currentUser;
     if (user == null) return;
 
-    _isLocallyUpdating = true;
+    _isLoading = true;
+    notifyListeners();
     try {
-      if (!isInWishlist(product.id)) {
-        _wishlist.add(product);
-        notifyListeners();
-      }
       await _cartRepository.addToWishlist(user.id, product);
     } finally {
-      _isLocallyUpdating = false;
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -177,13 +163,13 @@ class CartProvider extends ChangeNotifier {
     final user = _authProvider?.currentUser;
     if (user == null) return;
 
-    _isLocallyUpdating = true;
+    _isLoading = true;
+    notifyListeners();
     try {
-      _wishlist.removeWhere((product) => product.id == productId);
-      notifyListeners();
       await _cartRepository.removeFromWishlist(user.id, productId);
     } finally {
-      _isLocallyUpdating = false;
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

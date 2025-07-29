@@ -22,12 +22,17 @@ class FirebaseRepository {
 
   // Collections
   CollectionReference get _usersCollection => _firestore.collection('users');
-  CollectionReference get _productsCollection => _firestore.collection('products');
+  CollectionReference get _productsCollection =>
+      _firestore.collection('products');
   CollectionReference get _ordersCollection => _firestore.collection('orders');
   CollectionReference get _categoriesCollection =>
       _firestore.collection('categories');
-  CollectionReference get _reviewsCollection => _firestore.collection('reviews');
-  CollectionReference get _cartsCollection => _firestore.collection('carts');
+  CollectionReference get _reviewsCollection =>
+      _firestore.collection('reviews');
+  CollectionReference _getCartCollection(String userId) {
+    return _usersCollection.doc(userId).collection('cart');
+  }
+
   CollectionReference _wishlistCollection(String userId) =>
       _usersCollection.doc(userId).collection('wishlist');
 
@@ -65,7 +70,9 @@ class FirebaseRepository {
 
   Future<List<UserModel>> getUsersByRole(String role) async {
     try {
-      final snapshot = await _usersCollection.where('role', isEqualTo: role).get();
+      final snapshot = await _usersCollection
+          .where('role', isEqualTo: role)
+          .get();
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id;
@@ -77,12 +84,14 @@ class FirebaseRepository {
     }
   }
 
-  Future<void> updateUserStatus(String userId, {bool? isBlocked, bool? isApproved}) async {
+  Future<void> updateUserStatus(
+    String userId, {
+    bool? isBlocked,
+    bool? isApproved,
+  }) async {
     try {
-      final updateData = <String, dynamic>{
-        'updatedAt': Timestamp.now(),
-      };
-      
+      final updateData = <String, dynamic>{'updatedAt': Timestamp.now()};
+
       if (isBlocked != null) updateData['isBlocked'] = isBlocked;
       if (isApproved != null) updateData['isApproved'] = isApproved;
 
@@ -96,7 +105,9 @@ class FirebaseRepository {
   // Product Operations
   Future<List<ProductModel>> getAllProducts() async {
     try {
-      final snapshot = await _productsCollection.orderBy('createdAt', descending: true).get();
+      final snapshot = await _productsCollection
+          .orderBy('createdAt', descending: true)
+          .get();
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id;
@@ -187,7 +198,9 @@ class FirebaseRepository {
   // Order Operations
   Future<List<OrderModel>> getAllOrders() async {
     try {
-      final snapshot = await _ordersCollection.orderBy('createdAt', descending: true).get();
+      final snapshot = await _ordersCollection
+          .orderBy('createdAt', descending: true)
+          .get();
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id;
@@ -258,7 +271,9 @@ class FirebaseRepository {
   // Category Operations
   Future<List<CategoryModel>> getAllCategories() async {
     try {
-      final snapshot = await _categoriesCollection.where('isActive', isEqualTo: true).get();
+      final snapshot = await _categoriesCollection
+          .where('isActive', isEqualTo: true)
+          .get();
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id;
@@ -322,10 +337,10 @@ class FirebaseRepository {
   Future<String> addReview(ReviewModel review) async {
     try {
       final docRef = await _reviewsCollection.add(review.toJson());
-      
+
       // Update product rating
       await _updateProductRating(review.productId);
-      
+
       return docRef.id;
     } catch (e) {
       print('Error adding review: $e');
@@ -338,7 +353,10 @@ class FirebaseRepository {
       final reviews = await getProductReviews(productId);
       if (reviews.isEmpty) return;
 
-      final totalRating = reviews.fold(0.0, (sum, review) => sum + review.rating);
+      final totalRating = reviews.fold(
+        0.0,
+        (sum, review) => sum + review.rating,
+      );
       final averageRating = totalRating / reviews.length;
 
       await _productsCollection.doc(productId).update({
@@ -383,7 +401,7 @@ class FirebaseRepository {
     try {
       final snapshot = await _productsCollection
           .where('name', isGreaterThanOrEqualTo: query)
-          .where('name', isLessThan: query + '\uf8ff')
+          .where('name', isLessThan: '$query\uf8ff')
           .get();
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
@@ -399,11 +417,13 @@ class FirebaseRepository {
   // Batch Operations
   Future<void> initializeSampleData() async {
     _firestore.batch();
-    
+
     try {
       // Note: This would typically be done once during app setup
       // The sample data would be imported from sample_data.dart
-      print('Sample data initialization should be done manually or through Firebase console');
+      print(
+        'Sample data initialization should be done manually or through Firebase console',
+      );
     } catch (e) {
       print('Error initializing sample data: $e');
     }
@@ -414,144 +434,104 @@ class FirebaseRepository {
     return _productsCollection
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              data['id'] = doc.id;
-              return ProductModel.fromJson(data);
-            }).toList());
+        .map(
+          (snapshot) => snapshot.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            data['id'] = doc.id;
+            return ProductModel.fromJson(data);
+          }).toList(),
+        );
   }
 
   Stream<List<OrderModel>> getOrdersStream({String? userId, String? sellerId}) {
     Query query = _ordersCollection;
-    
+
     if (userId != null) {
       query = query.where('userId', isEqualTo: userId);
     }
-    
+
     if (sellerId != null) {
       query = query.where('sellerId', isEqualTo: sellerId);
     }
-    
+
     return query
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              data['id'] = doc.id;
-              return OrderModel.fromJson(data);
-            }).toList());
+        .map(
+          (snapshot) => snapshot.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            data['id'] = doc.id;
+            return OrderModel.fromJson(data);
+          }).toList(),
+        );
   }
 
   // Cart Operations
-  DocumentReference _getCartDoc(String userId) {
-    return _cartsCollection.doc(userId);
-  }
-
   Future<void> addToCart(
-      String userId, ProductModel product, int quantity) async {
-    final cartRef = _getCartDoc(userId);
+    String userId,
+    ProductModel product,
+    int quantity,
+  ) async {
+    final cartItemRef = _getCartCollection(userId).doc(product.id);
 
+    // Use a transaction for safety
     return _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(cartRef);
+      final snapshot = await transaction.get(cartItemRef);
 
-      if (!snapshot.exists) {
-        transaction.set(cartRef, {
-          'userId': userId,
-          'updatedAt': FieldValue.serverTimestamp(),
-          'items': [
-            CartItem(product: product, quantity: quantity).toMap(),
-          ],
+      if (snapshot.exists) {
+        // If the item already exists, increment the quantity
+        final existingQuantity =
+            (snapshot.data() as Map<String, dynamic>)['quantity'] as int;
+        transaction.update(cartItemRef, {
+          'quantity': existingQuantity + quantity,
         });
-        return;
-      }
-
-      final data = snapshot.data() as Map<String, dynamic>;
-      final items = (data['items'] as List<dynamic>)
-          .map((item) => CartItem.fromMap(item))
-          .toList();
-
-      final existingIndex =
-          items.indexWhere((item) => item.product.id == product.id);
-
-      if (existingIndex >= 0) {
-        items[existingIndex].quantity += quantity;
       } else {
-        items.add(CartItem(product: product, quantity: quantity));
+        // If the item doesn't exist, create a new document for it
+        final cartItem = CartItem(product: product, quantity: quantity);
+        transaction.set(cartItemRef, cartItem.toMap());
       }
-
-      transaction.update(cartRef, {
-        'items': items.map((item) => item.toMap()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
     });
   }
 
   Future<void> removeFromCart(String userId, String productId) async {
-    final cartRef = _getCartDoc(userId);
-
-    return _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(cartRef);
-      if (!snapshot.exists) return;
-
-      final data = snapshot.data() as Map<String, dynamic>;
-      final items = (data['items'] as List<dynamic>)
-          .map((item) => CartItem.fromMap(item))
-          .toList();
-
-      items.removeWhere((item) => item.product.id == productId);
-
-      transaction.update(cartRef, {
-        'items': items.map((item) => item.toMap()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
+    await _getCartCollection(userId).doc(productId).delete();
   }
 
   Future<void> updateQuantity(
-      String userId, String productId, int quantity) async {
-    final cartRef = _getCartDoc(userId);
-
-    return _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(cartRef);
-      if (!snapshot.exists) return;
-
-      final data = snapshot.data() as Map<String, dynamic>;
-      final items = (data['items'] as List<dynamic>)
-          .map((item) => CartItem.fromMap(item))
-          .toList();
-
-      final index = items.indexWhere((item) => item.product.id == productId);
-
-      if (index >= 0) {
-        if (quantity <= 0) {
-          items.removeAt(index);
-        } else {
-          items[index].quantity = quantity;
-        }
-      }
-
-      transaction.update(cartRef, {
-        'items': items.map((item) => item.toMap()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
+    String userId,
+    String productId,
+    int quantity,
+  ) async {
+    if (quantity <= 0) {
+      // If quantity is zero or less, remove the item
+      await removeFromCart(userId, productId);
+    } else {
+      // Otherwise, update the quantity field
+      await _getCartCollection(
+        userId,
+      ).doc(productId).update({'quantity': quantity});
+    }
   }
 
   Future<void> clearCart(String userId) async {
-    await _getCartDoc(userId).update({
-      'items': [],
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    final cartSnapshot = await _getCartCollection(userId).get();
+    final batch = _firestore.batch();
+
+    for (final doc in cartSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
   }
 
   Stream<List<CartItem>> getCartStream(String userId) {
-    return _getCartDoc(userId).snapshots().map((snapshot) {
-      if (!snapshot.exists) return [];
-      final data = snapshot.data() as Map<String, dynamic>;
-      if (data['items'] == null) return [];
-      return (data['items'] as List<dynamic>)
-          .map((item) => CartItem.fromMap(item))
-          .toList();
+    return _getCartCollection(userId).snapshots().map((snapshot) {
+      if (snapshot.docs.isEmpty) return [];
+
+      // Map each document in the subcollection to a CartItem object
+      return snapshot.docs.map((doc) {
+        return CartItem.fromMap(doc.data() as Map<String, dynamic>);
+      }).toList();
     });
   }
 
@@ -567,10 +547,10 @@ class FirebaseRepository {
   Stream<List<ProductModel>> getWishlistStream(String userId) {
     return _wishlistCollection(userId).snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) =>
-              ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>),
+          )
           .toList();
     });
   }
 }
-

@@ -64,7 +64,7 @@ class ProductCard extends StatelessWidget {
                       width: double.infinity,
                       height: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
+                        color: Colors.black.withOpacity(0.5),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(12),
                         ),
@@ -118,57 +118,71 @@ class ProductCard extends StatelessWidget {
               flex: 2,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                // --- FIX: Wrap the Column with SingleChildScrollView ---
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '\$${product.price.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (product.averageRating > 0)
+                      const SizedBox(height: 4),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(Icons.star, size: 16, color: Colors.amber),
-                          const SizedBox(width: 4),
                           Text(
-                            product.averageRating.toStringAsFixed(1),
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          Text(
-                            ' (${product.reviewCount})',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
                           ),
+                          if (product.averageRating > 0)
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  size: 16,
+                                  color: Colors.amber,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  product.averageRating.toStringAsFixed(1),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                Text(
+                                  ' (${product.reviewCount})',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (showActions)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text(
+                                'Stock: ${product.inventory}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: product.inventory <= 5
+                                      ? Colors.red
+                                      : Colors.grey[600],
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                    if (showActions)
-                      Text(
-                        'Stock: ${product.inventory}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: product.inventory <= 5
-                              ? Colors.red
-                              : Colors.grey[600],
-                        ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
