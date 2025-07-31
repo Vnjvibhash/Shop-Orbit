@@ -25,6 +25,24 @@ class FirestoreService {
     }
   }
 
+  Future<List<UserModel>> getUsersByRole(String role) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: role)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return UserModel.fromJson(data);
+      }).toList();
+    } catch (e) {
+      print('Error getting users by role: $e');
+      return [];
+    }
+  }
+
   Future<void> updateUserStatus(String userId, bool isBlocked) async {
     try {
       await _firestore.collection('users').doc(userId).update({

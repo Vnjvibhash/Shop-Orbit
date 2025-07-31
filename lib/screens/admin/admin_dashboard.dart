@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shoporbit/screens/admin/all_orders_screen.dart';
 import 'package:shoporbit/widgets/common/custom_app_bar.dart';
 import 'package:shoporbit/services/firestore_service.dart';
 import 'package:shoporbit/widgets/dashboard_card.dart';
@@ -68,29 +69,60 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        DashboardCard(
-                          title: 'Total Users',
-                          value: analytics['totalUsers']?.toString() ?? '0',
-                          icon: Icons.people,
-                          color: Colors.blue,
+                        InkWell(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ManageUsersScreen(),
+                            ),
+                          ),
+                          child: DashboardCard(
+                            title: 'Total Users',
+                            value: analytics['totalUsers']?.toString() ?? '0',
+                            icon: Icons.people,
+                            color: Colors.blue,
+                          ),
                         ),
-                        DashboardCard(
-                          title: 'Total Sellers',
-                          value: analytics['totalSellers']?.toString() ?? '0',
-                          icon: Icons.store,
-                          color: Colors.green,
+                        InkWell(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ManageSellersScreen(),
+                            ),
+                          ),
+                          child: DashboardCard(
+                            title: 'Total Sellers',
+                            value: analytics['totalSellers']?.toString() ?? '0',
+                            icon: Icons.store,
+                            color: Colors.green,
+                          ),
                         ),
-                        DashboardCard(
-                          title: 'Total Products',
-                          value: analytics['totalProducts']?.toString() ?? '0',
-                          icon: Icons.inventory,
-                          color: Colors.orange,
+                        InkWell(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const ManageCategoriesScreen(),
+                            ),
+                          ),
+                          child: DashboardCard(
+                            title: 'Total Products',
+                            value:
+                                analytics['totalProducts']?.toString() ?? '0',
+                            icon: Icons.inventory,
+                            color: Colors.orange,
+                          ),
                         ),
-                        DashboardCard(
-                          title: 'Total Orders',
-                          value: analytics['totalOrders']?.toString() ?? '0',
-                          icon: Icons.shopping_bag,
-                          color: Colors.purple,
+                        InkWell(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const AllOrdersScreen(),
+                            ),
+                          ),
+                          child: DashboardCard(
+                            title: 'Total Orders',
+                            value: analytics['totalOrders']?.toString() ?? '0',
+                            icon: Icons.shopping_bag,
+                            color: Colors.purple,
+                          ),
                         ),
                       ],
                     ),
