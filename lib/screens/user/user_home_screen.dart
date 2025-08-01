@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoporbit/providers/auth_provider.dart';
+import 'package:shoporbit/screens/user/category_list_screen.dart';
 import 'package:shoporbit/widgets/common/custom_app_bar.dart';
 import 'package:shoporbit/models/category_model.dart';
 import 'package:shoporbit/models/product_model.dart';
@@ -225,7 +226,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const ProductListScreen(),
+                      builder: (context) => const CategoryListScreen(),
                     ),
                   );
                 },

@@ -21,21 +21,26 @@ class _ProductListScreenState extends State<ProductListScreen> {
   bool isLoading = true;
   String searchQuery = '';
   String sortBy = 'name';
+  List<String> categories = [];
+  String selectedCategory = 'All';
 
   @override
   void initState() {
     super.initState();
     _loadProducts();
+    _loadCategories().then((_) => _loadProducts());
   }
 
   Future<void> _loadProducts() async {
     try {
-      final allProducts = await _firestoreService.getProducts(
-        category: widget.category,
-      );
+      final allProducts = await _firestoreService.getProducts();
       setState(() {
         products = allProducts.where((product) => product.isActive).toList();
-        filteredProducts = products;
+        filteredProducts = (selectedCategory == 'All')
+            ? products
+            : products
+                  .where((product) => product.category == selectedCategory)
+                  .toList();
         isLoading = false;
       });
       _sortProducts();
@@ -47,16 +52,31 @@ class _ProductListScreenState extends State<ProductListScreen> {
     }
   }
 
+  Future<void> _loadCategories() async {
+    try {
+      final cats = await _firestoreService.getCategories();
+      setState(() {
+        categories = ['All', ...cats.map((c) => c.name)];
+        selectedCategory = 'All';
+      });
+    } catch (e) {
+      print('Error loading categories: $e');
+      categories = ['All'];
+    }
+  }
+
   void _filterProducts(String query) {
     setState(() {
       searchQuery = query;
+      List<ProductModel> baseList = selectedCategory == 'All'
+          ? products
+          : products.where((p) => p.category == selectedCategory).toList();
       if (query.isEmpty) {
-        filteredProducts = products;
+        filteredProducts = baseList;
       } else {
-        filteredProducts = products.where((product) {
+        filteredProducts = baseList.where((product) {
           return product.name.toLowerCase().contains(query.toLowerCase()) ||
-              product.description.toLowerCase().contains(query.toLowerCase()) ||
-              product.category.toLowerCase().contains(query.toLowerCase());
+              product.description.toLowerCase().contains(query.toLowerCase());
         }).toList();
       }
     });
