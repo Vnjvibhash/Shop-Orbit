@@ -1,5 +1,9 @@
 # ShopOrbit - Multi-Role E-commerce Flutter App
 
+<p align="center">
+  <img src="assets/images/logo.png?raw=true" alt="ShopOrbit Logo" height="400"/>
+</p>
+
 A complete 3-module shopping application built with Flutter and Firebase, featuring role-based access control for Admin, Seller, and User roles.
 
 ## Features
@@ -58,15 +62,16 @@ A complete 3-module shopping application built with Flutter and Firebase, featur
 ## Project Structure
 ```
 lib/
-├── main.dart                 # App entry point with Firebase initialization
+├── main.dart                # App entry point with Firebase initialization
 ├── theme.dart               # Material Design theme configuration
 ├── data_schema.dart         # Firestore database schema documentation
-├── sample_data.dart         # Sample data for testing
 ├── models/                  # Data models
 │   ├── user_model.dart
 │   ├── product_model.dart
 │   ├── order_model.dart
 │   ├── category_model.dart
+│   ├── address_model.dart
+│   ├── cart_model.dart
 │   └── review_model.dart
 ├── services/                # Business logic and API services
 │   ├── auth_service.dart
