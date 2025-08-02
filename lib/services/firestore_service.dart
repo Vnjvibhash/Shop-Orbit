@@ -12,13 +12,11 @@ class FirestoreService {
   Future<List<UserModel>> getUsers() async {
     try {
       final querySnapshot = await _firestore.collection('users').get();
-      return querySnapshot.docs
-          .map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return UserModel.fromJson(data);
-          })
-          .toList();
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return UserModel.fromJson(data);
+      }).toList();
     } catch (e) {
       print('Error getting users: $e');
       return [];
@@ -71,13 +69,11 @@ class FirestoreService {
   Future<List<CategoryModel>> getCategories() async {
     try {
       final querySnapshot = await _firestore.collection('categories').get();
-      return querySnapshot.docs
-          .map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return CategoryModel.fromJson(data);
-          })
-          .toList();
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return CategoryModel.fromJson(data);
+      }).toList();
     } catch (e) {
       print('Error getting categories: $e');
       return [];
@@ -95,7 +91,10 @@ class FirestoreService {
 
   Future<void> updateCategory(CategoryModel category) async {
     try {
-      await _firestore.collection('categories').doc(category.id).update(category.toJson());
+      await _firestore
+          .collection('categories')
+          .doc(category.id)
+          .update(category.toJson());
     } catch (e) {
       print('Error updating category: $e');
       rethrow;
@@ -112,26 +111,27 @@ class FirestoreService {
   }
 
   // Products
-  Future<List<ProductModel>> getProducts({String? category, String? sellerId}) async {
+  Future<List<ProductModel>> getProducts({
+    String? category,
+    String? sellerId,
+  }) async {
     try {
       Query query = _firestore.collection('products');
-      
+
       if (category != null) {
         query = query.where('category', isEqualTo: category);
       }
-      
+
       if (sellerId != null) {
         query = query.where('sellerId', isEqualTo: sellerId);
       }
 
       final querySnapshot = await query.get();
-      return querySnapshot.docs
-          .map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            data['id'] = doc.id;
-            return ProductModel.fromJson(data);
-          })
-          .toList();
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return ProductModel.fromJson(data);
+      }).toList();
     } catch (e) {
       print('Error getting products: $e');
       return [];
@@ -163,7 +163,10 @@ class FirestoreService {
 
   Future<void> updateProduct(ProductModel product) async {
     try {
-      await _firestore.collection('products').doc(product.id).update(product.toJson());
+      await _firestore
+          .collection('products')
+          .doc(product.id)
+          .update(product.toJson());
     } catch (e) {
       print('Error updating product: $e');
       rethrow;
@@ -183,11 +186,11 @@ class FirestoreService {
   Future<List<OrderModel>> getOrders({String? userId, String? sellerId}) async {
     try {
       Query query = _firestore.collection('orders');
-      
+
       if (userId != null) {
         query = query.where('userId', isEqualTo: userId);
       }
-      
+
       if (sellerId != null) {
         query = query.where('sellerId', isEqualTo: sellerId);
       }
@@ -195,13 +198,11 @@ class FirestoreService {
       query = query.orderBy('createdAt', descending: true);
 
       final querySnapshot = await query.get();
-      return querySnapshot.docs
-          .map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            data['id'] = doc.id;
-            return OrderModel.fromJson(data);
-          })
-          .toList();
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return OrderModel.fromJson(data);
+      }).toList();
     } catch (e) {
       print('Error getting orders: $e');
       return [];
@@ -237,14 +238,12 @@ class FirestoreService {
           .where('productId', isEqualTo: productId)
           .orderBy('createdAt', descending: true)
           .get();
-      
-      return querySnapshot.docs
-          .map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return ReviewModel.fromJson(data);
-          })
-          .toList();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return ReviewModel.fromJson(data);
+      }).toList();
     } catch (e) {
       print('Error getting reviews: $e');
       return [];
@@ -254,7 +253,7 @@ class FirestoreService {
   Future<void> addReview(ReviewModel review) async {
     try {
       await _firestore.collection('reviews').add(review.toJson());
-      
+
       // Update product rating
       await _updateProductRating(review.productId);
     } catch (e) {
@@ -268,7 +267,10 @@ class FirestoreService {
       final reviews = await getProductReviews(productId);
       if (reviews.isEmpty) return;
 
-      final totalRating = reviews.fold(0.0, (sum, review) => sum + review.rating);
+      final totalRating = reviews.fold(
+        0.0,
+        (sum, review) => sum + review.rating,
+      );
       final averageRating = totalRating / reviews.length;
 
       await _firestore.collection('products').doc(productId).update({
@@ -285,15 +287,20 @@ class FirestoreService {
   Future<Map<String, int>> getAnalytics() async {
     try {
       final usersSnapshot = await _firestore.collection('users').get();
-      final sellersSnapshot = await _firestore.collection('users').where('role', isEqualTo: 'seller').get();
+      final sellersSnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'seller')
+          .get();
       final productsSnapshot = await _firestore.collection('products').get();
       final ordersSnapshot = await _firestore.collection('orders').get();
+      final categorySnapshot = await _firestore.collection('categories').get();
 
       return {
         'totalUsers': usersSnapshot.docs.length,
         'totalSellers': sellersSnapshot.docs.length,
         'totalProducts': productsSnapshot.docs.length,
         'totalOrders': ordersSnapshot.docs.length,
+        'totalCategories': categorySnapshot.docs.length,
       };
     } catch (e) {
       print('Error getting analytics: $e');
@@ -302,6 +309,7 @@ class FirestoreService {
         'totalSellers': 0,
         'totalProducts': 0,
         'totalOrders': 0,
+        'totalCategories': 0,
       };
     }
   }

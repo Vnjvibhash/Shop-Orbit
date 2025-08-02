@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shoporbit/models/product_model.dart';
-import 'package:shoporbit/services/firestore_service.dart';
-import 'package:shoporbit/widgets/common/loading_widget.dart';
-import 'package:shoporbit/widgets/product_card.dart';
 import 'package:shoporbit/screens/user/product_details_screen.dart';
+import 'package:shoporbit/services/firestore_service.dart';
+import 'package:shoporbit/widgets/common/product_filter_bar.dart';
+import 'package:shoporbit/widgets/product_card.dart';
 
 class ProductListScreen extends StatefulWidget {
   final String? category;
@@ -16,40 +16,21 @@ class ProductListScreen extends StatefulWidget {
 
 class _ProductListScreenState extends State<ProductListScreen> {
   final FirestoreService _firestoreService = FirestoreService();
+
   List<ProductModel> products = [];
   List<ProductModel> filteredProducts = [];
+
   bool isLoading = true;
   String searchQuery = '';
   String sortBy = 'name';
+
   List<String> categories = [];
   String selectedCategory = 'All';
 
   @override
   void initState() {
     super.initState();
-    _loadProducts();
     _loadCategories().then((_) => _loadProducts());
-  }
-
-  Future<void> _loadProducts() async {
-    try {
-      final allProducts = await _firestoreService.getProducts();
-      setState(() {
-        products = allProducts.where((product) => product.isActive).toList();
-        filteredProducts = (selectedCategory == 'All')
-            ? products
-            : products
-                  .where((product) => product.category == selectedCategory)
-                  .toList();
-        isLoading = false;
-      });
-      _sortProducts();
-    } catch (e) {
-      print('Error loading products: $e');
-      setState(() {
-        isLoading = false;
-      });
-    }
   }
 
   Future<void> _loadCategories() async {
@@ -57,33 +38,59 @@ class _ProductListScreenState extends State<ProductListScreen> {
       final cats = await _firestoreService.getCategories();
       setState(() {
         categories = ['All', ...cats.map((c) => c.name)];
-        selectedCategory = 'All';
+        selectedCategory =
+            widget.category != null && categories.contains(widget.category!)
+            ? widget.category!
+            : 'All';
       });
     } catch (e) {
       print('Error loading categories: $e');
-      categories = ['All'];
+      setState(() => categories = ['All']);
     }
   }
 
-  void _filterProducts(String query) {
-    setState(() {
-      searchQuery = query;
-      List<ProductModel> baseList = selectedCategory == 'All'
-          ? products
-          : products.where((p) => p.category == selectedCategory).toList();
-      if (query.isEmpty) {
-        filteredProducts = baseList;
-      } else {
-        filteredProducts = baseList.where((product) {
-          return product.name.toLowerCase().contains(query.toLowerCase()) ||
-              product.description.toLowerCase().contains(query.toLowerCase());
-        }).toList();
-      }
-    });
-    _sortProducts();
+  Future<void> _loadProducts() async {
+    setState(() => isLoading = true);
+    try {
+      final allProducts = await _firestoreService.getProducts();
+      setState(() {
+        products = allProducts.where((p) => p.isActive).toList();
+        _applyFilters();
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading products: $e');
+      setState(() => isLoading = false);
+    }
   }
 
-  void _sortProducts() {
+  void _applyFilters() {
+    List<ProductModel> tempProducts = products;
+
+    if (selectedCategory != 'All') {
+      tempProducts = tempProducts
+          .where((p) => p.category == selectedCategory)
+          .toList();
+    }
+
+    if (selectedCategory != 'All') {
+      
+    }
+
+    if (searchQuery.isNotEmpty) {
+      tempProducts = tempProducts.where((product) {
+        final q = searchQuery.toLowerCase();
+        return product.name.toLowerCase().contains(q) ||
+            product.description.toLowerCase().contains(q) ||
+            product.category.toLowerCase().contains(q);
+      }).toList();
+    }
+
+    filteredProducts = tempProducts;
+    _applySorting();
+  }
+
+  void _applySorting() {
     setState(() {
       switch (sortBy) {
         case 'name':
@@ -104,18 +111,39 @@ class _ProductListScreenState extends State<ProductListScreen> {
     });
   }
 
+  void _onCategorySelected(String category) {
+    setState(() {
+      selectedCategory = category;
+      // Reset search
+      searchQuery = '';
+      _applyFilters();
+    });
+  }
+
+  void _onStatusSelected(String status) {
+    setState(() {
+      selectedCategory = status;
+      _applyFilters();
+    });
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      searchQuery = query;
+      _applyFilters();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.category ?? 'Products'),
+        title: Text(selectedCategory == 'All' ? 'Products' : selectedCategory),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
-              setState(() {
-                sortBy = value;
-              });
-              _sortProducts();
+              setState(() => sortBy = value);
+              _applySorting();
             },
             itemBuilder: (context) => [
               const PopupMenuItem(
@@ -161,15 +189,25 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ],
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: ProductFilterBar(
+            categories: categories,
+            selectedCategory: selectedCategory,
+            onCategorySelected: _onCategorySelected,
+            categoryList: categories,
+            selectedStatus: selectedCategory,
+            onStatusSelected: _onStatusSelected,
+          ),
+        ),
       ),
       body: isLoading
-          ? const LoadingWidget()
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: TextField(
-                    onChanged: _filterProducts,
                     decoration: InputDecoration(
                       hintText: 'Search products...',
                       prefixIcon: const Icon(Icons.search),
@@ -177,17 +215,21 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           ? IconButton(
                               icon: const Icon(Icons.clear),
                               onPressed: () {
-                                _filterProducts('');
+                                _onSearchChanged('');
                               },
                             )
                           : null,
                       border: const OutlineInputBorder(),
                     ),
+                    onChanged: _onSearchChanged,
                   ),
                 ),
                 Expanded(
                   child: RefreshIndicator(
-                    onRefresh: _loadProducts,
+                    onRefresh: () async {
+                      await _loadProducts();
+                      setState(() {});
+                    },
                     child: filteredProducts.isEmpty
                         ? Center(
                             child: Column(
@@ -212,6 +254,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                 Text(
                                   'Try adjusting your search or check back later',
                                   style: TextStyle(color: Colors.grey[600]),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ),

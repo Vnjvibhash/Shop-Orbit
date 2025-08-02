@@ -103,9 +103,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             ),
                           ),
                           child: DashboardCard(
-                            title: 'Total Products',
+                            title: 'Total Categories',
                             value:
-                                analytics['totalProducts']?.toString() ?? '0',
+                                analytics['totalCategories']?.toString() ?? '0',
                             icon: Icons.inventory,
                             color: Colors.orange,
                           ),
