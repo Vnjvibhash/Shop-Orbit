@@ -55,7 +55,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         title: 'ShopOrbit',
         showSearch: true,
         showCart: true,
-        showLogout: true,
         ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

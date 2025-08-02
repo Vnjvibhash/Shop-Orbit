@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:shoporbit/providers/auth_provider.dart';
+import 'package:shoporbit/widgets/common/custom_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -110,7 +111,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Profile')),
+          appBar: CustomAppBar(
+            title: 'Profile',
+            showLogout: true,
+          ),
           body: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Padding(
