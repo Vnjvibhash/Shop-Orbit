@@ -3,7 +3,7 @@ import 'package:shoporbit/models/product_model.dart';
 import 'package:shoporbit/screens/user/product_details_screen.dart';
 import 'package:shoporbit/services/firestore_service.dart';
 import 'package:shoporbit/widgets/common/product_filter_bar.dart';
-import 'package:shoporbit/widgets/product_card.dart';
+import 'package:shoporbit/widgets/cards/product_card.dart';
 
 class ProductListScreen extends StatefulWidget {
   final String? category;

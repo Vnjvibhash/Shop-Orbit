@@ -4,7 +4,7 @@ import 'package:shoporbit/providers/auth_provider.dart';
 import 'package:shoporbit/models/order_model.dart';
 import 'package:shoporbit/services/firestore_service.dart';
 import 'package:shoporbit/widgets/common/loading_widget.dart';
-import 'package:shoporbit/widgets/order_card.dart';
+import 'package:shoporbit/widgets/cards/order_card.dart';
 
 class SellerOrdersScreen extends StatefulWidget {
   const SellerOrdersScreen({super.key});

@@ -54,7 +54,7 @@ class CategoryItemWidget extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 16,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shoporbit/models/category_model.dart';
 import 'package:shoporbit/screens/user/product_list_screen.dart';
 import 'package:shoporbit/services/firestore_service.dart';
-import 'package:shoporbit/widgets/category_card.dart';
+import 'package:shoporbit/widgets/cards/category_card.dart';
 
 class CategoryListScreen extends StatefulWidget {
   const CategoryListScreen({super.key});

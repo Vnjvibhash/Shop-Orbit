@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shoporbit/screens/admin/all_orders_screen.dart';
 import 'package:shoporbit/widgets/common/custom_app_bar.dart';
 import 'package:shoporbit/services/firestore_service.dart';
-import 'package:shoporbit/widgets/dashboard_card.dart';
+import 'package:shoporbit/widgets/cards/dashboard_card.dart';
 import 'package:shoporbit/screens/admin/manage_users_screen.dart';
 import 'package:shoporbit/screens/admin/manage_sellers_screen.dart';
 import 'package:shoporbit/screens/admin/manage_categories_screen.dart';

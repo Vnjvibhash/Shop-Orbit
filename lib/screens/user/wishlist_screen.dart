@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoporbit/providers/cart_provider.dart';
-import 'package:shoporbit/widgets/product_card.dart';
+import 'package:shoporbit/widgets/cards/product_card.dart';
 import 'package:shoporbit/screens/user/product_details_screen.dart';
 
 class WishlistScreen extends StatelessWidget {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shoporbit/models/product_model.dart';
 import 'package:shoporbit/screens/user/product_list_screen.dart';
 import 'package:shoporbit/screens/user/product_details_screen.dart';
-import 'package:shoporbit/widgets/product_card.dart';
+import 'package:shoporbit/widgets/cards/product_card.dart';
 
 class FeaturedProductsSection extends StatelessWidget {
   final List<ProductModel> featuredProducts;

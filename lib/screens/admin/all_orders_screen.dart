@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shoporbit/models/order_model.dart';
 import 'package:shoporbit/models/user_model.dart';
 import 'package:shoporbit/services/firestore_service.dart';
-import 'package:shoporbit/widgets/order_card.dart';
+import 'package:shoporbit/widgets/cards/order_card.dart';
 import 'package:shoporbit/widgets/common/loading_widget.dart';
 
 class AllOrdersScreen extends StatefulWidget {

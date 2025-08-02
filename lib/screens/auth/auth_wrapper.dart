@@ -6,7 +6,7 @@ import 'package:shoporbit/screens/auth/login_screen.dart';
 import 'package:shoporbit/screens/seller/seller_dashboard.dart';
 import 'package:shoporbit/screens/seller/seller_pending_approval_screen.dart';
 import 'package:shoporbit/screens/user/user_blocked_screen.dart';
-import 'package:shoporbit/screens/user/user_home_screen.dart';
+import 'package:shoporbit/widgets/bottom_navigation_bar.dart';
 import 'package:shoporbit/widgets/common/loading_widget.dart';
 
 class AuthWrapper extends StatelessWidget {
@@ -44,7 +44,7 @@ class AuthWrapper extends StatelessWidget {
             return const SellerDashboard();
           case 'user':
           default:
-            return const UserHomeScreen();
+            return const MainScreen();
         }
       },
     );

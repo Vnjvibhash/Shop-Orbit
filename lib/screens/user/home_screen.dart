@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoporbit/providers/auth_provider.dart';
-import 'package:shoporbit/widgets/category_section.dart';
+import 'package:shoporbit/widgets/sections/category_section.dart';
 import 'package:shoporbit/widgets/common/custom_app_bar.dart';
 import 'package:shoporbit/models/category_model.dart';
 import 'package:shoporbit/models/product_model.dart';
 import 'package:shoporbit/services/firestore_service.dart';
-import 'package:shoporbit/widgets/featured_products_section.dart';
+import 'package:shoporbit/widgets/sections/featured_products_section.dart';
 import 'package:shoporbit/screens/user/product_list_screen.dart';
 import 'package:shoporbit/screens/user/cart_screen.dart';
 import 'package:shoporbit/screens/user/order_history_screen.dart';
 import 'package:shoporbit/screens/user/wishlist_screen.dart';
-import 'package:shoporbit/widgets/welcome_section.dart';
+import 'package:shoporbit/widgets/sections/welcome_section.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});

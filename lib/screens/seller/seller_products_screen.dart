@@ -5,7 +5,7 @@ import 'package:shoporbit/models/product_model.dart';
 import 'package:shoporbit/services/firestore_service.dart';
 import 'package:shoporbit/widgets/common/loading_widget.dart';
 import 'package:shoporbit/screens/seller/add_product_screen.dart';
-import 'package:shoporbit/widgets/product_card.dart';
+import 'package:shoporbit/widgets/cards/product_card.dart';
 
 class SellerProductsScreen extends StatefulWidget {
   const SellerProductsScreen({super.key});

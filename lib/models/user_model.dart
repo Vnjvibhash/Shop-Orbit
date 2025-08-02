@@ -53,8 +53,8 @@ class UserModel {
       'addresses': addresses,
       'isBlocked': isBlocked,
       'isApproved': isApproved,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 }
