@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shoporbit/main.dart'; // To access AuthWrapper
 import 'package:shoporbit/providers/auth_provider.dart';
+import 'package:shoporbit/screens/auth/auth_wrapper.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

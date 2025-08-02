@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ProductFilterBar extends StatelessWidget {
-  final List<String> categories;
   final String selectedCategory;
   final void Function(String) onCategorySelected;
 
@@ -11,7 +10,6 @@ class ProductFilterBar extends StatelessWidget {
 
   const ProductFilterBar({
     super.key,
-    required this.categories,
     required this.selectedCategory,
     required this.onCategorySelected,
     required this.categoryList,

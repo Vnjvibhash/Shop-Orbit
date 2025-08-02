@@ -174,12 +174,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       'Monitor orders from all sellers',
                       Icons.shopping_bag,
                       Colors.purple,
-                      () {
-                        // Navigate to all orders screen
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('All Orders screen not implemented yet')),
-                        );
-                      },
+                      () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const AllOrdersScreen(),
+                        ),
+                      ),
                     ),
                   ],
                 ),

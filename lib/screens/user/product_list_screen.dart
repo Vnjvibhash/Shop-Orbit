@@ -192,7 +192,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: ProductFilterBar(
-            categories: categories,
             selectedCategory: selectedCategory,
             onCategorySelected: _onCategorySelected,
             categoryList: categories,
