@@ -107,7 +107,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> updateUserProfile({
     required String name,
     required String email,
-    File? imageFile,
+    File? profileImage,
     List<String>? addresses,
     bool? isBlocked,
     bool? isApproved,
@@ -119,13 +119,13 @@ class AuthProvider with ChangeNotifier {
     String? profileImageUrl = _currentUser!.profileImage;
 
     // 1. Upload new profile image if provided
-    if (imageFile != null) {
+    if (profileImage != null) {
       final ref = _storage
           .ref()
           .child('profile_pictures')
           .child('${_currentUser!.id}.jpg');
 
-      await ref.putFile(imageFile);
+      await ref.putFile(profileImage);
       profileImageUrl = await ref.getDownloadURL();
     }
 

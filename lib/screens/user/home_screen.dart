@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shoporbit/providers/auth_provider.dart';
 import 'package:shoporbit/widgets/sections/category_section.dart';
 import 'package:shoporbit/widgets/common/custom_app_bar.dart';
 import 'package:shoporbit/models/category_model.dart';
 import 'package:shoporbit/models/product_model.dart';
 import 'package:shoporbit/services/firestore_service.dart';
 import 'package:shoporbit/widgets/sections/featured_products_section.dart';
-import 'package:shoporbit/screens/user/product_list_screen.dart';
-import 'package:shoporbit/screens/user/cart_screen.dart';
-import 'package:shoporbit/screens/user/order_history_screen.dart';
-import 'package:shoporbit/screens/user/wishlist_screen.dart';
 import 'package:shoporbit/widgets/sections/welcome_section.dart';
 
 class UserHomeScreen extends StatefulWidget {
@@ -59,75 +53,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'ShopOrbit',
+        showSearch: true,
         showCart: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ProductListScreen(),
-                ),
-              );
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'orders') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const OrderHistoryScreen(),
-                  ),
-                );
-              } else if (value == 'cart') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const CartScreen()),
-                );
-              } else if (value == 'wishlist') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const WishlistScreen(),
-                  ),
-                );
-              } else if (value == 'logout') {
-                context.read<AuthProvider>().signOut();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'wishlist',
-                child: Row(
-                  children: [
-                    Icon(Icons.favorite),
-                    SizedBox(width: 8),
-                    Text('Wish List'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'orders',
-                child: Row(
-                  children: [
-                    Icon(Icons.history),
-                    SizedBox(width: 8),
-                    Text('Order History'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 8),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        showLogout: true,
+        ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

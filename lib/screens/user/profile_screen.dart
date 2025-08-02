@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
-// Adjust these imports according to your project structure
+import 'package:intl/intl.dart';
 import 'package:shoporbit/providers/auth_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -20,6 +19,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _imageFile;
   bool _isLoading = false;
 
+  List<TextEditingController> _addressControllers = [];
+
+  @override
+  void dispose() {
+    for (final c in _addressControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(
@@ -33,17 +42,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _initializeAddressControllers(List<String> addresses) {
+    _addressControllers = addresses
+        .map((addr) => TextEditingController(text: addr))
+        .toList();
+    if (_addressControllers.isEmpty) {
+      _addressControllers.add(TextEditingController());
+    }
+  }
+
+  void _addAddressField() {
+    setState(() {
+      _addressControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeAddressField(int index) {
+    setState(() {
+      _addressControllers[index].dispose();
+      _addressControllers.removeAt(index);
+    });
+  }
+
   Future<void> _saveProfile(AuthProvider authProvider) async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
     setState(() => _isLoading = true);
 
+    // Gather all addresses that are not empty
+    List<String> updatedAddresses = _addressControllers
+        .map((controller) => controller.text.trim())
+        .where((addr) => addr.isNotEmpty)
+        .toList();
+
     try {
-      // You'd update Firestore or your backend here:
+      // Update Firestore or your backend here:
       await authProvider.updateUserProfile(
         name: _name!.trim(),
         email: _email!.trim(),
-        imageFile: _imageFile,
+        profileImage: _imageFile,
+        addresses: updatedAddresses,
       );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully!')),
@@ -57,11 +95,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  String formatDateTime(DateTime dateTime) {
+    return DateFormat('yyyy-MM-dd HH:mm').format(dateTime.toLocal());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
         final user = authProvider.currentUser;
+        // Initialize address controllers if empty and if user has addresses:
+        if (_addressControllers.isEmpty && user != null) {
+          _initializeAddressControllers(user.addresses);
+        }
+
         return Scaffold(
           appBar: AppBar(title: const Text('Profile')),
           body: _isLoading
@@ -80,15 +127,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 backgroundImage: _imageFile != null
                                     ? FileImage(_imageFile!)
                                     : (user?.profileImage != null &&
-                                          user!.profileImage!.isNotEmpty)
-                                    ? NetworkImage(user.profileImage!)
+                                          (user?.profileImage?.isNotEmpty ??
+                                              false))
+                                    ? NetworkImage(user!.profileImage!)
                                     : null,
                                 child:
                                     _imageFile == null &&
                                         (user?.profileImage == null ||
-                                            (user
-                                                    ?.profileImage
-                                                    ?.isNotEmpty !=
+                                            (user?.profileImage?.isNotEmpty !=
                                                 true))
                                     ? const Icon(Icons.person, size: 60)
                                     : null,
@@ -135,7 +181,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               : null,
                           onSaved: (val) => _email = val,
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Addresses',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+
+                        // List of address input fields
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _addressControllers.length,
+                          itemBuilder: (context, index) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _addressControllers[index],
+                                    decoration: InputDecoration(
+                                      labelText: 'Address ${index + 1}',
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (_addressControllers.length > 1)
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.remove_circle,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () => _removeAddressField(index),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: _addAddressField,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add Address'),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Display createdAt and updatedAt (read-only)
+                        if (user != null) ...[
+                          Text(
+                            'Account Created: ${formatDateTime(user.createdAt)}',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Last Updated: ${formatDateTime(user.updatedAt)}',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
                         ElevatedButton(
                           onPressed: () => _saveProfile(authProvider),
                           child: const Text('Save Changes'),

@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:shoporbit/providers/auth_provider.dart';
 import 'package:shoporbit/providers/cart_provider.dart';
 import 'package:shoporbit/screens/user/cart_screen.dart';
+import 'package:shoporbit/screens/user/product_list_screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final bool showSearch;
   final bool showCart;
   final bool showLogout;
   final List<Widget>? actions;
@@ -13,6 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
     super.key,
     required this.title,
+    this.showSearch = false,
     this.showCart = false,
     this.showLogout = false,
     this.actions,
@@ -26,42 +29,56 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(title),
       actions: [
+        if (showSearch)
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ProductListScreen(),
+                ),
+              );
+            },
+          ),
         if (showCart)
           Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const CartScreen(),
-                    ),
-                  );
-                },
-              ),
-              if (cartProvider.itemCount > 0)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '${cartProvider.itemCount}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                      textAlign: TextAlign.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.shopping_cart),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const CartScreen(),
+                      ),
+                    );
+                  },
+                ),
+                if (cartProvider.itemCount > 0)
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '${cartProvider.itemCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
+              ],
+            ),
         if (showLogout)
           IconButton(
             icon: const Icon(Icons.logout),
